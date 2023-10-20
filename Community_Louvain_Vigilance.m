@@ -1,9 +1,9 @@
 close all
 clear all
 
-addpath C:\Users\bibroce\OneDrive - VUMC\MATLAB\CEB-helper-functions\
-addpath "C:\Users\bibroce\OneDrive - VUMC\MATLAB\CEB-helper-functions\BrainNetViewer_20191031\"
-addpath "C:\Users\bibroce\OneDrive - VUMC\MATLAB\CEB-helper-functions\2019_03_03_BCT\"
+addpath Z:\Camden\CEB-helper-functions\
+addpath Z:\Camden\CEB-helper-functions\BrainNetViewer_20191031\
+addpath Z:\shared_toolboxes\2019_03_03_BCT\
 load("C:\Users\bibroce\OneDrive - VUMC\MATLAB\fMRI_data\Vigilance_max_min\pat_data_low.mat");
 min_vig_data = permute(pat_data, [2,3,1]);
 load("C:\Users\bibroce\OneDrive - VUMC\MATLAB\fMRI_data\Vigilance_max_min\pat_data_max.mat");
