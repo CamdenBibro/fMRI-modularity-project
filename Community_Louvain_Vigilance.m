@@ -12,7 +12,7 @@ load("Z:\000_Data\fMRI\spm8_new_preprocessed_data\data\parcellated_and_connectiv
 network_names = fMRI_struct.region_names_ic;
 net_idx = fMRI_struct.node_network_ids;
 [~,net_sorted_idx] = sort(net_idx);
-
+x = 2; 
 % 
 % 
 % 
