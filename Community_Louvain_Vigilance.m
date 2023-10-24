@@ -18,11 +18,13 @@ x = 2;
 targetNodes = ["HG_contra" "HG_ipsi" "aSMG_ipsi" "aSMG_contra" "PP_ipsi" "PP_contra" "CO_ipsi" "CO_contra" "IC_ipsi" "IC_contra" "SMA_ipsi" "SMA_contra"];
 homeBases = ["IFGtri_ipsi" "IFGOper_ipsi" "MedFC_ipsi" "FOrb_ipsi"];
 
-for i = 1:size(targetNodes,2)
-    IDX = find(contains(network_names,targetNodes(i)));
+IDX = zeros(1,12);
+IDX2 = zeros(1,4);
+for i = 1:12
+    IDX(:,i) = find(contains(network_names,targetNodes(i)));
 end
-for ii = size(homeBases)
-    IDX2 = find(contains(network_names, homeBases(i)));
+for ii = 1:4
+    IDX2(:,i) = find(contains(network_names, homeBases(i)));
 end
 
 % patient_data =  permute(patient_data, [2,3,1]);
@@ -70,9 +72,13 @@ for pp = 1:iter
     [M3, ~] = consensus_community_louvain_with_finetuning(W3, gamma1); 
     
     % Change purmutation back to original order.
-    M3_reordered = 
+    [~, original_row_idx] = sort(rows_purmute);
+    [~, original_column_idx] = sort(columns_purmute);
+    M3_reordered = M3(original_column_idx,original_row_idx);
 
-dadsadas
+    target_at_home = 0;
+    if 
+
     %now see if ___ is paired with _____
 
 end
