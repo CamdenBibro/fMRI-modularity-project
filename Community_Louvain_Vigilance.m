@@ -13,44 +13,71 @@ network_names = fMRI_struct.region_names_ic;
 net_idx = fMRI_struct.node_network_ids;
 [~,net_sorted_idx] = sort(net_idx);
 x = 2; 
-% 
-% 
-% 
+
+
+targetNodes = ["HG_contra" "HG_ipsi" "aSMG_ipsi" "aSMG_contra" "PP_ipsi" "PP_contra" "CO_ipsi" "CO_contra" "IC_ipsi" "IC_contra" "SMA_ipsi" "SMA_contra"];
+homeBases = ["IFGtri_ipsi" "IFGOper_ipsi" "MedFC_ipsi" "FOrb_ipsi"];
+
+for i = 1:size(targetNodes,2)
+    IDX = find(contains(network_names,targetNodes(i)));
+end
+for ii = size(homeBases)
+    IDX2 = find(contains(network_names, homeBases(i)));
+end
+
 % patient_data =  permute(patient_data, [2,3,1]);
 % patient_data(:,:,10) = [];        % remove problematic subjects
 % control_data = permute(control_data, [2,3,1]); 
 % control_data(:,:,[37,5,12]) = []; % remove problematic subjects
 
-%% max vig
-n = 129;
-pat_data = max_vig_data; % make smaller dataset for testing
-[pat] = size(pat_data,3); 
+%% MAXIMUM VIGILANCE :: PURMUTATIONS TESTING
 
-K2 = zeros(n,pat);
-gamma1 = 1.1;            % Set GAMMA value
+iter = 1000;
 
-% louvain %
-for p = progress(1:pat)
-    X = squeeze(pat_data(:,:,p));
-    X(isnan(X)) = 0;
-    X(X<0) = 0;
-    scaled_X = weight_conversion(X, 'normalize');
-    [M1, Q1a] = consensus_community_louvain_with_finetuning(scaled_X, gamma1); 
-    K2(:, p) = M1; 
+for pp = 1:iter
+
+    n = 129;
+    pat_data = max_vig_data; % make smaller dataset for testing
+    [pat] = size(pat_data,3); 
+    
+    K2 = zeros(n,pat);
+    gamma1 = 1.1;            % Set GAMMA value
+    
+    % louvain %
+    for p = progress(1:pat)
+        X = squeeze(pat_data(:,:,p));
+        X(isnan(X)) = 0;
+        X(X<0) = 0;
+        rows_purmute = randperm(130);
+        columns_purmute = randperm(130);
+        X1 = X(rows_purmute,columns_purmute);
+        scaled_X = weight_conversion(X1, 'normalize');
+        [M1, Q1a] = consensus_community_louvain_with_finetuning(scaled_X, gamma1); 
+        K2(:, p) = M1; 
+    end
+    
+    % association mat across patients %
+    W2 = zeros(size(X));
+    for i = 1:p
+        KK2 = ((squeeze(K2(:,i))) == (squeeze(K2(:,i)))');
+        W2 = W2 + KK2; 
+    end
+     W2 = W2 / p;
+     W3 = weight_conversion(W2, 'normalize');
+    
+     % louvain on association matrix %
+    [M2_max, q1_pats] = consensus_community_louvain_with_finetuning(W2, gamma1);
+    [M3, ~] = consensus_community_louvain_with_finetuning(W3, gamma1); 
+    
+    % Change purmutation back to original order.
+    M3_reordered = 
+
+dadsadas
+    %now see if ___ is paired with _____
+
 end
 
-% association mat across patients %
-W2 = zeros(size(X));
-for i = 1:p
-    KK2 = ((squeeze(K2(:,i))) == (squeeze(K2(:,i)))');
-    W2 = W2 + KK2; 
-end
- W2 = W2 / p;
- W3 = weight_conversion(W2, 'normalize');
 
- % louvain on association matrix %
-[M2_max, q1_pats] = consensus_community_louvain_with_finetuning(W2, gamma1);
-[M3, ~] = consensus_community_louvain_with_finetuning(W3, gamma1); 
 
 %% 
 [~, NMI] = partition_distance(K2');
