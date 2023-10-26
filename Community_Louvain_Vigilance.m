@@ -4,17 +4,17 @@ clear all
 addpath Z:\shared_toolboxes\Derek_functions\
 addpath Z:\shared_toolboxes\MatlabProgressBar\
 addpath Z:\shared_toolboxes\2019_03_03_BCT\
-load("Z:\Camden\fMRI_data\Vigilance_max_min\con_data_max.mat");
-max_vig_data = permute(con_data_max, [2,3,1]);
-load("Z:\Camden\fMRI_data\Vigilance_max_min\con_data_low.mat");
-min_vig_data = permute(con_data, [2,3,1]);
+load("Z:\Camden\fMRI_data\Vigilance_max_min\pat_data_max.mat");
+max_vig_data = permute(pat_data_max, [2,3,1]);
+load("Z:\Camden\fMRI_data\Vigilance_max_min\pat_data_low.mat");
+min_vig_data = permute(pat_data, [2,3,1]);
 load("Z:\000_Data\fMRI\spm8_new_preprocessed_data\data\parcellated_and_connectivity_fmri_data\AAN_Bfore_BNST_CONN_2minWindow_2sStride\pat20\pat20_parcellated.mat")
 network_names = fMRI_struct.region_names_ic;
 net_idx = fMRI_struct.node_network_ids;
 [~,net_sorted_idx] = sort(net_idx);
 x = 2; 
 
-
+n = size(max_vig_data,1);
 targetNodes = ["HG_contra" "HG_ipsi" "aSMG_ipsi" "aSMG_contra" "PP_ipsi" "PP_contra" "CO_ipsi" "CO_contra" "IC_ipsi" "IC_contra" "SMA_ipsi" "SMA_contra"];
 homeBases = ["IFGtri_ipsi" "IFGoper_ipsi" "MedFC_ipsi" "FOrb_ipsi"];
 
@@ -30,7 +30,7 @@ end
 % STORING PERMUTATION VALUES
 is_target_at_home_question_mark = zeros(1000,1);
 
-
+M3_original_order = zeros(1000,n); 
 
 %% MAXIMUM VIGILANCE :: PURMUTATIONS TESTING
 
@@ -75,7 +75,7 @@ for pp = progress(1:iter)
     % Change purmutation back to original order.
     [~, original_row_idx] = sort(rows_purmute);
    % [~, original_column_idx] = sort(columns_purmute);
-    M3_original_order = M3(original_row_idx);
+    M3_original_order(pp,:) = M3(original_row_idx);
 
     % Check to see if the nodes of interest tend 
     for jj = 1:size(IDX,2)
