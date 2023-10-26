@@ -26,12 +26,11 @@ end
 for ii = 1:4
     IDX2(:,ii) = find(contains(network_names, homeBases(ii)));
 end
+
+% STORING PERMUTATION VALUES
 is_target_at_home_question_mark = zeros(1000,1);
 
-% patient_data =  permute(patient_data, [2,3,1]);
-% patient_data(:,:,10) = [];        % remove problematic subjects
-% control_data = permute(control_data, [2,3,1]); 
-% control_data(:,:,[37,5,12]) = []; % remove problematic subjects
+
 
 %% MAXIMUM VIGILANCE :: PURMUTATIONS TESTING
 
