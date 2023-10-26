@@ -16,7 +16,7 @@ x = 2;
 
 
 targetNodes = ["HG_contra" "HG_ipsi" "aSMG_ipsi" "aSMG_contra" "PP_ipsi" "PP_contra" "CO_ipsi" "CO_contra" "IC_ipsi" "IC_contra" "SMA_ipsi" "SMA_contra"];
-homeBases = ["IFGtri_ipsi" "IFGOper_ipsi" "MedFC_ipsi" "FOrb_ipsi"];
+homeBases = ["IFGtri_ipsi" "IFGoper_ipsi" "MedFC_ipsi" "FOrb_ipsi"];
 
 IDX = zeros(1,12);
 IDX2 = zeros(1,4);
@@ -24,8 +24,9 @@ for i = 1:12
     IDX(:,i) = find(contains(network_names,targetNodes(i)));
 end
 for ii = 1:4
-    IDX2(:,i) = find(contains(network_names, homeBases(i)));
+    IDX2(:,ii) = find(contains(network_names, homeBases(ii)));
 end
+is_target_at_home_question_mark = zeros(1000,1);
 
 % patient_data =  permute(patient_data, [2,3,1]);
 % patient_data(:,:,10) = [];        % remove problematic subjects
@@ -34,9 +35,9 @@ end
 
 %% MAXIMUM VIGILANCE :: PURMUTATIONS TESTING
 
-iter = 1000;
+iter = 10; % start with 10 as test
 
-for pp = 1:iter
+for pp = progress(1:iter)
 
     n = 129;
     pat_data = max_vig_data; % make smaller dataset for testing
@@ -50,11 +51,12 @@ for pp = 1:iter
         X = squeeze(pat_data(:,:,p));
         X(isnan(X)) = 0;
         X(X<0) = 0;
-        rows_purmute = randperm(130);
-        columns_purmute = randperm(130);
-        X1 = X(rows_purmute,columns_purmute);
-        scaled_X = weight_conversion(X1, 'normalize');
-        [M1, Q1a] = consensus_community_louvain_with_finetuning(scaled_X, gamma1); 
+        X_scaled = weight_conversion(X, 'normalize');
+        rows_purmute = randperm(n);
+       % columns_purmute = randperm(n);
+        X_perm = X_scaled(rows_purmute,:); % TRYING ONLY ROW PERMUTATION: Row and column blows up # of communities detected. 
+        X_perm(1:n+1:end) = 0;             % preserve diagonal
+        [M1, Q1a] = consensus_community_louvain_with_finetuning(X_perm, gamma1); 
         K2(:, p) = M1; 
     end
     
@@ -73,13 +75,18 @@ for pp = 1:iter
     
     % Change purmutation back to original order.
     [~, original_row_idx] = sort(rows_purmute);
-    [~, original_column_idx] = sort(columns_purmute);
-    M3_reordered = M3(original_column_idx,original_row_idx);
+   % [~, original_column_idx] = sort(columns_purmute);
+    M3_original_order = M3(original_row_idx);
 
-    target_at_home = 0;
-    if 
-
-    %now see if ___ is paired with _____
+    % Check to see if the nodes of interest tend 
+    for jj = 1:size(IDX,2)
+        community_designation = M3_original_order(IDX(:,jj));
+        if sum(M3_original_order(IDX2),'all')*4 == community_designation*4
+            is_target_at_home_question_mark(pp) = 1;
+        else 
+            is_target_at_home_question_mark(pp) = 0;
+        end
+    end
 
 end
 
@@ -139,8 +146,8 @@ for p = progress(1:pat)
     X = squeeze(pat_data(:,:,p));
     X(isnan(X)) = 0;
     X(X<0) = 0;
-    scaled_X = weight_conversion(X, 'normalize');
-    [M1, Q1a] = consensus_community_louvain_with_finetuning(scaled_X, gamma1); 
+    X_scaled = weight_conversion(X, 'normalize');
+    [M1, Q1a] = consensus_community_louvain_with_finetuning(X_scaled, gamma1); 
     K2(:, p) = M1; 
 end
 
