@@ -15,22 +15,24 @@ net_idx = fMRI_struct.node_network_ids;
 x = 2; 
 
 n = size(max_vig_data,1);
-targetNodes = ["HG_contra" "HG_ipsi" "aSMG_ipsi" "aSMG_contra" "PP_ipsi" "PP_contra" "CO_ipsi" "CO_contra" "IC_ipsi" "IC_contra" "SMA_ipsi" "SMA_contra"];
-homeBases = ["IFGtri_ipsi" "IFGoper_ipsi" "MedFC_ipsi" "FOrb_ipsi"];
+home_bases = ["HG_contra" "HG_ipsi" "aSMG_ipsi" "aSMG_contra" "PP_ipsi" "PP_contra" "CO_ipsi" "CO_contra" "IC_ipsi" "IC_contra" "SMA_ipsi" "SMA_contra"];
+targets = ["IFGtri_ipsi" "IFGoper_ipsi" "MedFC_ipsi" "FOrb_ipsi"];
 
-IDX = zeros(1,12);
-IDX2 = zeros(1,4);
+IDX_home_base = zeros(1,12);
+IDX_target = zeros(1,4);
 for i = 1:12
-    IDX(:,i) = find(contains(network_names,targetNodes(i)));
+    IDX_home_base(:,i) = find(contains(network_names,home_bases(i)));
 end
 for ii = 1:4
-    IDX2(:,ii) = find(contains(network_names, homeBases(ii)));
+    IDX_target(:,ii) = find(contains(network_names, targets(ii)));
 end
 
 % STORING PERMUTATION VALUES
 is_target_at_home_question_mark = zeros(1000,1);
 
 M3_original_order = zeros(1000,n); 
+M3_original_order_tmp = zeros(1000,n); 
+
 
 %% MAXIMUM VIGILANCE :: PURMUTATIONS TESTING
 
@@ -53,10 +55,12 @@ for pp = progress(1:iter)
         X_scaled = weight_conversion(X, 'normalize');
         rows_purmute = randperm(n);
        % columns_purmute = randperm(n);
-        X_perm = X_scaled(rows_purmute,:); % TRYING ONLY ROW PERMUTATION: Row and column blows up # of communities detected. 
-        X_perm(1:n+1:end) = 0;             % preserve diagonal
+        X_perm = X_scaled(rows_purmute,rows_purmute); % TRYING ONLY ROW PERMUTATION: Row and column blows up # of communities detected. 
+        X_perm(1:n+1:end) = 0;                        % preserve diagonal
         [M1, Q1a] = consensus_community_louvain_with_finetuning(X_perm, gamma1); 
-        K2(:, p) = M1; 
+        [~, original_row_idx] = sort(rows_purmute);
+        M1_original = M1(original_row_idx);
+        K2(:, p) = M1_original; 
     end
     
     % association mat across patients %
@@ -67,25 +71,19 @@ for pp = progress(1:iter)
     end
      W2 = W2 / p;
      W3 = weight_conversion(W2, 'normalize');
-    
+     
      % louvain on association matrix %
     [M2_max, q1_pats] = consensus_community_louvain_with_finetuning(W2, gamma1);
     [M3, ~] = consensus_community_louvain_with_finetuning(W3, gamma1); 
     
-    % Change purmutation back to original order.
-    [~, original_row_idx] = sort(rows_purmute);
-   % [~, original_column_idx] = sort(columns_purmute);
-    M3_original_order(pp,:) = M3(original_row_idx);
-
-    % Check to see if the nodes of interest tend 
-    for jj = 1:size(IDX,2)
-        community_designation = M3_original_order(IDX(:,jj));
-        if sum(M3_original_order(IDX2),'all')*4 == community_designation*4
-            is_target_at_home_question_mark(pp) = 1;
-        else 
-            is_target_at_home_question_mark(pp) = 0;
-        end
+    M3_original_order_tmp(pp,:) = M3; 
+    
+    for i = 1:10
+        M3_original_order_tmp(i,IDX_target)
+        M3_original_order_tmp(i,IDX_home_base)
     end
+    
+
 
 end
 
