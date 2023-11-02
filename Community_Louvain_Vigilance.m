@@ -20,19 +20,21 @@ x = 2;
 % patient_data(:,:,10) = [];        % remove problematic subjects
 % control_data = permute(control_data, [2,3,1]); 
 % control_data(:,:,[37,5,12]) = []; % remove problematic subjects
-con_data_max = control_con_mats(:,:,:,1);
-con_data_min = control_con_mats(:,:,:,2);
+pat_data_max = patient_con_mats(:,:,:,1);
+pat_data_max = permute(pat_data_max, [2,3,1]);
+pat_data_min = patient_con_mats(:,:,:,2);
+pat_data_min = permute(pat_data_min, [2,3,1]); 
 
 %% max vig
 n = 129;
-[pat] = size(con_data_max,3); 
+[pat] = size(pat_data_max,3); 
 
 K2 = zeros(n,pat);
 gamma1 = 1.1;            % Set GAMMA value
 
 % louvain %
 for p = progress(1:pat)
-    X = squeeze(con_data_max(:,:,p));
+    X = squeeze(pat_data_max(:,:,p));
     X(isnan(X)) = 0;
     X(X<0) = 0;
     scaled_X = weight_conversion(X, 'normalize');
@@ -97,15 +99,14 @@ figure, imagesc(reordered_W2, "CDataMapping","scaled"); title("max VIG: reordere
 %% Control Louvain %%
 n = 129;
 
-con_data_min = min_vig_data; % make smaller dataset for testing
-[pat] = size(con_data_min,3); 
+[pat] = size(pat_data_min,3); 
 
 K2 = zeros(n,pat);
 gamma1 = 1.1;
 
 % louvain %
 for p = progress(1:pat)
-    X = squeeze(con_data_min(:,:,p));
+    X = squeeze(pat_data_min(:,:,p));
     X(isnan(X)) = 0;
     X(X<0) = 0;
     scaled_X = weight_conversion(X, 'normalize');
